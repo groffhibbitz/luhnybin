@@ -1,4 +1,5 @@
 #!/bin/sh
 
 # Call your program here instead of cat.
-cat
+python filter.py
+
