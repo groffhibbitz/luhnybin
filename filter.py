@@ -18,7 +18,7 @@ logger.addHandler(fh)
 
 
 def test(ints):
-    logger.debug('going to test with %s' %ints)
+    #logger.debug('going to test with %s' %ints)
 
     double = True
     total = 0
@@ -33,6 +33,9 @@ def test(ints):
             double = False
         else:
             total += x
+            double = True
+
+        #logger.debug("s: %s total:%s" %(total, x))
 
     if total % 10 == 0:
         return True
@@ -48,24 +51,42 @@ for line in sys.stdin:
     buf = []
     current_pass = False
 
+    index = 0
+    crossout = []
     for x in line:
         try:
             num = int(x)
 
             buf.append(num)
 
-            test_result = test(buf)
+            current_pass = test(buf)
                 
-            logger.debug("got test result of %s" %test_result)
+            #logger.debug("got test result of %s" %current_pass)
 
             if len(buf) == 14 and current_pass == True:
-                logger.debug('found a match')
+                # TODO use a dict not a list for crossout
+                crossout.extend([index - i for i in range(0,14)])
+                logger.debug('found a match: %s' %buf)
+                #logger.debug('crossout is: %s' %crossout)
+                
 
         except ValueError:
-            # clear buffer
-            buf = []
+            # clear buffer only if not a space or dash
+            if x == ' ' or x == '-':
+                pass
+            else:
+                buf = []
+        finally:
+            if len(buf) > 16:
+                buf = buf[1:]
+            index += 1
 
-        output += x
+        #output += x
 
-        
+    for idx, val in enumerate(line):
+        if idx in crossout:
+            output += 'X'
+        else:
+            output += val
+
     print output,
