@@ -17,6 +17,7 @@ formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(messag
 fh.setFormatter(formatter)
 logger.addHandler(fh)
 
+vals = {0:0, 1:2, 2:4, 3:6, 4:8, 5:1, 6:3, 7:5, 8:7, 9:9}
 
 def luhn_test(ints_tuple):
     #logger.debug('going to test with %s' %ints_tuple)
@@ -25,29 +26,17 @@ def luhn_test(ints_tuple):
     double = False
     if len(ints_tuple)%2 == 0:
         double = True
-    else: 
-        double = False
 
     total = 0
     
-    for idx, tup in enumerate(ints_tuple):
+    for tup in ints_tuple:
         x = tup[1]
         if double:
-            temp = x * 2
-            if temp > 9:
-                temp = temp/10 + (temp - 10)
-
-            total += temp
-
+            total += vals[x]
             double = False
         else:
             total += x
             double = True
-
-
-        if idx == 13:
-            if total % 10 == 0:
-                pass
 
     if total % 10 == 0:
         #logger.debug('returning true')
@@ -56,15 +45,12 @@ def luhn_test(ints_tuple):
         #logger.debug('total is %s returning false' %total)
         return False
 
-
 #logger.debug('going to do stuff')
 
 def do_filter(line):
     out = list(line)
 
-    to_test = get_lists_to_test(line)
-    
-    for test_list in to_test:
+    for test_list in get_lists_to_test(line):
         if luhn_test(test_list):
             for x in test_list:
                 out[x[0]] = 'X'
@@ -82,23 +68,18 @@ def get_lists_to_test(line):
         elif x in [' ', '-']:
             continue
         else:
-            if len(dbuff) > 13:
+            length = len(dbuff)
+            if length > 13:
                 for i in range(13,16):
-                    num_sublists = len(dbuff) - i 
-
-                    sublists = [dbuff[j:j+i+1] for j in range (0, num_sublists)]
-                          
-                    #logger.debug('got sublists: %s' %sublists)
-
+                    if i >= length:
+                        continue
+                    sublists = [dbuff[j:j+i+1] for j in range (0, length - i)]
                     to_test.extend(sublists)
 
             dbuff = []
     
-    #logger.debug('to_test is %s' %to_test)
-
     return to_test
 
 for line in sys.stdin:
-    output = do_filter(line)
+    print do_filter(line),
 
-    print output,
